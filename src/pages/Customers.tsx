@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
@@ -74,12 +75,15 @@ const MOCK_CUSTOMERS: Customer[] = [
   },
 ];
 
+// Local storage key
+const CUSTOMERS_STORAGE_KEY = 'salon-app-customers';
+
 const Customers: React.FC = () => {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [customers, setCustomers] = useState<Customer[]>(MOCK_CUSTOMERS);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -94,7 +98,35 @@ const Customers: React.FC = () => {
     phone: '',
     notes: '',
     preferences: [],
+    advanceBalance: 0,
   });
+
+  // Load customers from localStorage on component mount
+  useEffect(() => {
+    const savedCustomers = localStorage.getItem(CUSTOMERS_STORAGE_KEY);
+    if (savedCustomers) {
+      try {
+        // Parse the JSON string and convert date strings back to Date objects
+        const parsedCustomers = JSON.parse(savedCustomers).map((customer: any) => ({
+          ...customer,
+          joinDate: new Date(customer.joinDate)
+        }));
+        setCustomers(parsedCustomers);
+      } catch (error) {
+        console.error('Error loading customers from localStorage:', error);
+        setCustomers(MOCK_CUSTOMERS);
+      }
+    } else {
+      setCustomers(MOCK_CUSTOMERS);
+    }
+  }, []);
+
+  // Save customers to localStorage whenever they change
+  useEffect(() => {
+    if (customers.length > 0) {
+      localStorage.setItem(CUSTOMERS_STORAGE_KEY, JSON.stringify(customers));
+    }
+  }, [customers]);
   
   // Filter customers by search query
   const filteredCustomers = customers.filter(customer => {
@@ -110,10 +142,20 @@ const Customers: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    // Handle numeric input for advanceBalance
+    if (name === 'advanceBalance') {
+      const numericValue = parseFloat(value) || 0;
+      setFormData(prev => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
   
   // Handle preferences input
@@ -139,6 +181,7 @@ const Customers: React.FC = () => {
       phone: '',
       notes: '',
       preferences: [],
+      advanceBalance: 0,
     });
     setIsAddDialogOpen(true);
   };
@@ -147,7 +190,10 @@ const Customers: React.FC = () => {
   const openEditDialog = (customer: Customer) => {
     setSelectedCustomer(customer);
     const { id, joinDate, totalAppointments, totalSpent, ...restOfData } = customer;
-    setFormData(restOfData);
+    setFormData({
+      ...restOfData,
+      advanceBalance: customer.advanceBalance || 0,
+    });
     setIsEditDialogOpen(true);
   };
   
@@ -171,6 +217,7 @@ const Customers: React.FC = () => {
       joinDate: new Date(),
       totalAppointments: 0,
       totalSpent: 0,
+      advanceBalance: formData.advanceBalance || 0,
     };
     
     setCustomers(prev => [...prev, newCustomer]);
@@ -212,6 +259,37 @@ const Customers: React.FC = () => {
     toast({
       title: 'Customer removed',
       description: `${selectedCustomer.name} has been removed from your customer list.`,
+    });
+  };
+  
+  // Add funds to customer's advance balance
+  const handleAddFunds = () => {
+    if (!selectedCustomer) return;
+    
+    const amountToAdd = parseFloat(prompt(`Enter amount to add to ${selectedCustomer.name}'s balance:`) || '0');
+    
+    if (amountToAdd <= 0) {
+      toast({
+        title: 'Invalid amount',
+        description: 'Please enter a positive amount to add.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const updatedCustomers = customers.map(customer => 
+      customer.id === selectedCustomer.id 
+        ? { 
+            ...customer, 
+            advanceBalance: (customer.advanceBalance || 0) + amountToAdd,
+          } 
+        : customer
+    );
+    
+    setCustomers(updatedCustomers);
+    toast({
+      title: 'Funds added',
+      description: `$${amountToAdd.toFixed(2)} has been added to ${selectedCustomer.name}'s balance.`,
     });
   };
   
@@ -372,6 +450,22 @@ const Customers: React.FC = () => {
                 />
               </div>
               <div className="col-span-2">
+                <label htmlFor="advanceBalance" className="block text-sm font-medium text-foreground mb-1">
+                  Advance Balance ($)
+                </label>
+                <input
+                  id="advanceBalance"
+                  name="advanceBalance"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.advanceBalance}
+                  onChange={handleInputChange}
+                  className="form-input"
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="col-span-2">
                 <label htmlFor="notes" className="block text-sm font-medium text-foreground mb-1">
                   Notes (optional)
                 </label>
@@ -470,6 +564,33 @@ const Customers: React.FC = () => {
                 />
               </div>
               <div className="col-span-2">
+                <label htmlFor="edit-advanceBalance" className="block text-sm font-medium text-foreground mb-1">
+                  Advance Balance ($)
+                </label>
+                <div className="flex items-center">
+                  <input
+                    id="edit-advanceBalance"
+                    name="advanceBalance"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.advanceBalance}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                  {selectedCustomer && (
+                    <button
+                      type="button"
+                      onClick={handleAddFunds}
+                      className="ml-2 inline-flex items-center px-3 py-2 border border-primary rounded-md bg-primary text-white text-sm font-medium"
+                    >
+                      <Plus size={14} className="mr-1" />
+                      Add Funds
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="col-span-2">
                 <label htmlFor="edit-notes" className="block text-sm font-medium text-foreground mb-1">
                   Notes (optional)
                 </label>
@@ -566,6 +687,9 @@ const Customers: React.FC = () => {
                 </div>
                 <div className="text-sm">
                   <span className="text-muted-foreground">Total Spent:</span> ${selectedCustomer?.totalSpent}
+                </div>
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Advance Balance:</span> ${selectedCustomer?.advanceBalance || 0}
                 </div>
               </div>
             </div>
