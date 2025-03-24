@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StatsCardProps {
   title: string;
@@ -30,7 +30,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
             {tooltipContent && (
               <Tooltip>
-                <Tooltip.Trigger asChild>
+                <TooltipTrigger asChild>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -45,10 +45,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
                       d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
                     />
                   </svg>
-                </Tooltip.Trigger>
-                <Tooltip.Content className="max-w-xs">
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
                   <p className="text-xs">{tooltipContent}</p>
-                </Tooltip.Content>
+                </TooltipContent>
               </Tooltip>
             )}
           </div>
