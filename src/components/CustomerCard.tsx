@@ -17,8 +17,8 @@ export interface Customer {
 interface CustomerCardProps {
   customer: Customer;
   onEdit?: (customer: Customer) => void;
-  onDelete?: (customerId: string) => void;
-  onViewHistory?: (customerId: string) => void;
+  onDelete?: (customer: Customer) => void; // Changed from (customerId: string)
+  onViewHistory?: (customer: Customer) => void; // Changed from (customerId: string)
   className?: string;
 }
 
@@ -48,7 +48,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           <div className="flex space-x-2">
             {onViewHistory && (
               <button
-                onClick={() => onViewHistory(customer.id)}
+                onClick={() => onViewHistory(customer)}
                 className="btn-outline text-xs px-2 py-1"
               >
                 History
@@ -64,7 +64,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
             )}
             {onDelete && (
               <button
-                onClick={() => onDelete(customer.id)}
+                onClick={() => onDelete(customer)}
                 className="p-1 rounded-full hover:bg-red-100 transition-colors"
               >
                 <Trash2 size={18} className="text-red-500" />

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -119,7 +118,6 @@ const Staff: React.FC = () => {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   
-  // Form state
   const [formData, setFormData] = useState<Omit<StaffMember, 'id' | 'rating' | 'appointmentsCompleted'>>({
     name: '',
     email: '',
@@ -139,14 +137,11 @@ const Staff: React.FC = () => {
     imageUrl: '',
   });
   
-  // Filter staff by position
   const filteredStaff = staff.filter(member => {
-    // Filter by search query
     const matchesSearch = 
       member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.position.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filter by position/role
     const matchesPosition = 
       activeTab === 'all' || 
       member.position.toLowerCase().includes(activeTab.toLowerCase());
@@ -154,17 +149,15 @@ const Staff: React.FC = () => {
     return matchesSearch && matchesPosition;
   });
   
-  // Get unique positions for tabs
   const positions = Array.from(
     new Set(
       staff.map(member => {
-        const position = member.position.split(' ')[0]; // Get first word of position
+        const position = member.position.split(' ')[0];
         return position.toLowerCase();
       })
     )
   );
   
-  // Handle form input change
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -175,7 +168,6 @@ const Staff: React.FC = () => {
     }));
   };
   
-  // Handle schedule selection
   const handleScheduleChange = (day: keyof StaffMember['schedule']) => {
     setFormData(prev => ({
       ...prev,
@@ -186,7 +178,6 @@ const Staff: React.FC = () => {
     }));
   };
   
-  // Handle service selection
   const handleServiceSelection = (serviceId: string) => {
     setFormData(prev => {
       const currentServiceIds = [...prev.serviceIds];
@@ -204,7 +195,6 @@ const Staff: React.FC = () => {
     });
   };
   
-  // Open add staff dialog
   const openAddDialog = () => {
     setFormData({
       name: '',
@@ -227,7 +217,6 @@ const Staff: React.FC = () => {
     setIsAddDialogOpen(true);
   };
   
-  // Open edit staff dialog
   const openEditDialog = (staffMember: StaffMember) => {
     setSelectedStaff(staffMember);
     const { rating, appointmentsCompleted, id, ...restOfData } = staffMember;
@@ -235,26 +224,20 @@ const Staff: React.FC = () => {
     setIsEditDialogOpen(true);
   };
   
-  // Open delete staff dialog
   const openDeleteDialog = (staffMember: StaffMember) => {
     setSelectedStaff(staffMember);
     setIsDeleteDialogOpen(true);
   };
   
-  // Open schedule dialog
-  const openScheduleDialog = (staffId: string) => {
-    const staffMember = staff.find(member => member.id === staffId);
-    if (staffMember) {
-      setSelectedStaff(staffMember);
-      setFormData(prev => ({
-        ...prev,
-        schedule: { ...staffMember.schedule },
-      }));
-      setIsScheduleDialogOpen(true);
-    }
+  const openScheduleDialog = (staffMember: StaffMember) => {
+    setSelectedStaff(staffMember);
+    setFormData(prev => ({
+      ...prev,
+      schedule: { ...staffMember.schedule },
+    }));
+    setIsScheduleDialogOpen(true);
   };
   
-  // Add new staff member
   const handleAddStaff = () => {
     const newStaff: StaffMember = {
       id: Math.random().toString(36).substring(2, 9),
@@ -271,7 +254,6 @@ const Staff: React.FC = () => {
     });
   };
   
-  // Update staff member
   const handleUpdateStaff = () => {
     if (!selectedStaff) return;
     
@@ -292,7 +274,6 @@ const Staff: React.FC = () => {
     });
   };
   
-  // Delete staff member
   const handleDeleteStaff = () => {
     if (!selectedStaff) return;
     
@@ -305,7 +286,6 @@ const Staff: React.FC = () => {
     });
   };
   
-  // Update staff schedule
   const handleUpdateSchedule = () => {
     if (!selectedStaff) return;
     
@@ -410,7 +390,6 @@ const Staff: React.FC = () => {
         </div>
       </main>
       
-      {/* Add Staff Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -569,7 +548,6 @@ const Staff: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Edit Staff Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -722,7 +700,6 @@ const Staff: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Schedule Dialog */}
       <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -779,7 +756,6 @@ const Staff: React.FC = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Delete Staff Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>

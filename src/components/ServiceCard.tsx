@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 
@@ -16,7 +15,7 @@ interface ServiceCardProps {
   service: Service;
   staffMembers?: Array<{ id: string; name: string }>;
   onEdit?: (service: Service) => void;
-  onDelete?: (serviceId: string) => void;
+  onDelete?: (service: Service) => void;
   className?: string;
   compact?: boolean;
 }
@@ -56,7 +55,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               )}
               {onDelete && (
                 <button
-                  onClick={() => onDelete(service.id)}
+                  onClick={() => onDelete(service)}
                   className="p-1 rounded-full hover:bg-red-100 transition-colors"
                 >
                   <Trash2 size={16} className="text-red-500" />
@@ -90,7 +89,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             )}
             {onDelete && (
               <button
-                onClick={() => onDelete(service.id)}
+                onClick={() => onDelete(service)}
                 className="p-1 rounded-full hover:bg-red-100 transition-colors"
               >
                 <Trash2 size={18} className="text-red-500" />

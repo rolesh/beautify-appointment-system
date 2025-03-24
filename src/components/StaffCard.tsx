@@ -28,8 +28,8 @@ interface StaffCardProps {
   staff: StaffMember;
   services?: Array<{ id: string; name: string }>;
   onEdit?: (staff: StaffMember) => void;
-  onDelete?: (staffId: string) => void;
-  onViewSchedule?: (staffId: string) => void;
+  onDelete?: (staff: StaffMember) => void; // Changed from (staffId: string)
+  onViewSchedule?: (staff: StaffMember) => void; // Changed from (staffId: string)
   className?: string;
 }
 
@@ -90,7 +90,7 @@ const StaffCard: React.FC<StaffCardProps> = ({
             <div className="flex space-x-2">
               {onViewSchedule && (
                 <button
-                  onClick={() => onViewSchedule(staff.id)}
+                  onClick={() => onViewSchedule(staff)}
                   className="p-1 rounded-full hover:bg-accent transition-colors"
                   title="View Schedule"
                 >
@@ -108,7 +108,7 @@ const StaffCard: React.FC<StaffCardProps> = ({
               )}
               {onDelete && (
                 <button
-                  onClick={() => onDelete(staff.id)}
+                  onClick={() => onDelete(staff)}
                   className="p-1 rounded-full hover:bg-red-100 transition-colors"
                   title="Delete Staff"
                 >

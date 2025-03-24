@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -159,12 +158,9 @@ const Customers: React.FC = () => {
   };
   
   // Open history dialog
-  const openHistoryDialog = (customerId: string) => {
-    const customer = customers.find(c => c.id === customerId);
-    if (customer) {
-      setSelectedCustomer(customer);
-      setIsHistoryDialogOpen(true);
-    }
+  const openHistoryDialog = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setIsHistoryDialogOpen(true);
   };
   
   // Add new customer
@@ -306,7 +302,7 @@ const Customers: React.FC = () => {
               customer={customer}
               onEdit={openEditDialog}
               onDelete={openDeleteDialog}
-              onViewHistory={() => openHistoryDialog(customer.id)}
+              onViewHistory={openHistoryDialog}
               className="animate-fade-in"
             />
           ))}
